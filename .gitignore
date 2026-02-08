@@ -164,3 +164,6 @@ TROUBLESHOOTING_GUIDE.md
 .venv_pyright/
 .venv/
 venv/
+**/.venv_pyright/
+**/.venv/
+**/venv/
