@@ -135,3 +135,32 @@ __pycache__/
 # Temporary lab files
 /lab-temp/
 /crpd-temp/
+
+# =========================
+# Claude / AI Development
+# =========================
+
+# Claude Code files and configuration
+.claude/
+
+# Project documentation (except README.md)
+# Keep only README.md in GitHub root
+AGENTS.md
+AUTOMATION.md
+CHANGELOG.md
+CLAUDE.md
+DEPLOYMENT_GUIDE.md
+MIGRATION_GUIDE.md
+PHASE1_CHANGELOG.md
+PHASE2_PLAN.md
+RENAME_SUMMARY.md
+SERVER_CONFIG.md
+SERVER_INSTALLATION_GUIDE.md
+SESSION_SUMMARY_*.md
+TASK_MANAGEMENT.md
+TROUBLESHOOTING_GUIDE.md
+
+# Python virtual environments
+.venv_pyright/
+.venv/
+venv/
