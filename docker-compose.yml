@@ -1,0 +1,151 @@
+# ----------------------------------------------------
+# VOLUME DEFINITIONS
+# ----------------------------------------------------
+volumes:
+  temp_upload_storage:  ## --> ADDED: Dedicated volume for temporary file uploads
+
+services:
+  # ----------------------------------------------------
+  # 0. REDIS MESSAGE BROKER
+  # ----------------------------------------------------
+  redis_broker:
+    image: redis:7.2-alpine
+    container_name: redis_broker
+    command: redis-server --appendonly no
+    restart: always
+    networks:
+      - internal_net
+
+  # ----------------------------------------------------
+  # 1. RUST WS HUB (Port 3100)
+  # ----------------------------------------------------
+  rust_backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.rust
+    container_name: rust_ws_hub
+    ports:
+      - "${RUST_WS_PORT:-3100}:3100"
+    restart: always
+    volumes:
+      - ./shared/data:/app/shared/data
+      - ./shared/schemas:/app/shared/schemas
+    depends_on:
+      - redis_broker
+    environment:
+      RUST_LOG: info
+      REDIS_HOST: redis_broker
+      REDIS_PORT: 6379
+    networks:
+      - internal_net
+
+  # ----------------------------------------------------
+  # 2. FASTAPI AUTOMATION GATEWAY (Port 8000) - API Server ONLY
+  # ----------------------------------------------------
+  fastapi_automation:
+    build:
+      context: .
+      dockerfile: Dockerfile.fastapi
+    container_name: fastapi_gateway
+    ports:
+      - "${API_GATEWAY_PORT:-8000}:8000"
+    depends_on:
+      - rust_backend
+      - redis_broker
+    restart: always
+    # CRITICAL: Runs ONLY the Uvicorn server (stable and responsive)
+    command: uvicorn app_gateway.main:app --host 0.0.0.0 --port 8000
+    environment:
+      RUST_WS_URL: ws://rust_backend:3100/ws
+      REDIS_HOST: redis_broker
+      REDIS_PORT: 6379
+    volumes:
+      # Ensure app_gateway/api/routers/operations.py is mounted here
+      - ./app_gateway:/app/app_gateway
+      - ./shared:/app/shared
+      - ./frontend/py_scripts:/app/app_gateway/py_scripts
+      - temp_upload_storage:/tmp/uploads  ## --> ADDED: Gateway writes here
+      # --- JSNAPy MAPPINGS ---
+      # 1. Config (where logging.yml will be auto-created)
+      - ./shared/jsnapy/config:/etc/jsnapy
+      # 2. Snapshots (so you can view XMLs on your host)
+      - ./shared/jsnapy/snapshots:/usr/local/share/jsnapy/snapshots
+      # 3. Logs (so you can debug failures on your host)
+      - ./shared/jsnapy/logs:/var/log/jsnapy
+    networks:
+      - internal_net
+      - crpd-net
+
+  # ----------------------------------------------------
+  # 3. DEDICATED FASTAPI WORKER - Job Execution ONLY
+  # ----------------------------------------------------
+  fastapi_worker:
+    build:
+      context: .
+      dockerfile: Dockerfile.fastapi
+    container_name: fastapi_worker
+    depends_on:
+      - redis_broker
+    # Restart policy is essential for a worker service
+    restart: always
+    environment:
+      REDIS_HOST: redis_broker
+      REDIS_PORT: 6379
+      # Environment variables needed by the automation script
+      PARAMIKO_HOSTKEY_VERIFY: "0"
+      PYTHONPATH: /app/app_gateway/py_scripts
+
+    # CRITICAL: Runs the dedicated worker script
+    command: /usr/local/bin/python /app/app_gateway/fastapi_worker.py
+
+    volumes:
+      # Needs access to the worker script and automation scripts
+      - ./app_gateway:/app/app_gateway
+      - ./shared:/app/shared
+      - ./frontend/py_scripts:/app/app_gateway/py_scripts
+      - ./shared/data:/backups
+      - temp_upload_storage:/tmp/uploads  ## --> ADDED: Worker reads from here
+      # --- JSNAPy MAPPINGS ---
+      # 1. Config (where logging.yml will be auto-created)
+      - ./shared/jsnapy/config:/etc/jsnapy
+      # 2. Snapshots (so you can view XMLs on your host)
+      - ./shared/jsnapy/snapshots:/usr/local/share/jsnapy/snapshots
+      # 3. Logs (so you can debug failures on your host)
+      - ./shared/jsnapy/logs:/var/log/jsnapy
+    networks:
+      # Only needs the internal network to talk to Redis and devices (via crpd-net)
+      - internal_net
+      - crpd-net
+
+  # ----------------------------------------------------
+  # 4. FRONTEND (React/Vite)
+  # ----------------------------------------------------
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+    container_name: frontend_app
+    ports:
+      - "${FRONTEND_PORT:-5173}:5173"
+    depends_on:
+      - fastapi_automation
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+    command: npm run dev -- --host 0.0.0.0
+    environment:
+      # Frontend uses these to connect to backend services
+      # ${VARIABLE} syntax reads from .env file
+      VITE_API_GATEWAY_URL: ${PROTOCOL}://${SERVER_HOST}:${API_GATEWAY_PORT}
+      VITE_RUST_WS_URL: ${WS_PROTOCOL}://${SERVER_HOST}:${RUST_WS_PORT}/ws
+    networks:
+      - internal_net
+
+# ----------------------------------------------------
+# NETWORK DEFINITIONS
+# ----------------------------------------------------
+networks:
+  internal_net:
+    driver: bridge
+  crpd-net:
+    external: true

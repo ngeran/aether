@@ -1,0 +1,220 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project Overview
+
+Aether is a multi-service network automation platform with a microservices architecture:
+
+- **Frontend**: React + Vite application (Port 5173)
+- **API Gateway**: FastAPI application for REST APIs and automation (Port 8000)
+- **WebSocket Hub**: Rust backend for real-time communication (Port 3100)
+- **Message Broker**: Redis for job queuing and pub/sub
+- **Worker Service**: Dedicated FastAPI worker for background job execution
+
+## Development Commands
+
+### Frontend (React + Vite)
+```bash
+cd frontend
+npm run dev          # Start development server on port 5173
+npm run build        # Build for production
+npm run lint         # Run ESLint
+npm run preview      # Preview production build
+```
+
+### Backend (Rust)
+```bash
+cd backend
+cargo run            # Start Rust WebSocket server on port 3100
+cargo build          # Build the project
+cargo test           # Run tests
+cargo check          # Check without building
+```
+
+### API Gateway (FastAPI)
+```bash
+cd app_gateway
+uvicorn main:app --host 0.0.0.0 --port 8000 --reload    # Development with auto-reload
+uvicorn main:app --host 0.0.0.0 --port 8000             # Production
+```
+
+### Docker Services
+```bash
+docker-compose up -d               # Start all services
+docker-compose up -d redis_broker  # Start only Redis
+docker-compose up -d rust_backend  # Start only Rust backend
+docker-compose logs -f fastapi_automation  # Follow API Gateway logs
+docker-compose restart fastapi_worker     # Restart worker service
+```
+
+## Architecture
+
+### Service Communication
+- **Frontend → API Gateway**: HTTP/REST APIs on port 8000
+- **Frontend → Rust Hub**: WebSocket connection on port 3100
+- **API Gateway → Rust Hub**: WebSocket client for real-time updates
+- **All Services → Redis**: Pub/sub messaging and job queuing
+
+### Key Components
+
+#### Frontend Structure
+- `src/App.jsx` - Main application with React Router setup
+- `src/context/NavigationContext.jsx` - Dynamic navigation state management
+- `src/layouts/AppLayout.jsx` - Main application layout with header/sidebar
+- `src/pages/Operations/` - Static routes for backup/restore operations
+- Dynamic routes are loaded from YAML configuration via Rust backend
+
+#### Backend Structure (Rust)
+- `src/main.rs` - Application entry point with Redis integration
+- `src/api/state.rs` - Shared application state and connection management
+- `src/routes/navigation.rs` - Navigation configuration endpoints
+- `src/services/yaml_service.rs` - YAML file management service
+- `src/services/redis_service.rs` - Redis pub/sub integration
+
+#### API Gateway Structure (FastAPI)
+- `main.py` - FastAPI application with router registration
+- `api/routers/` - Organized by functional domain:
+  - `automation.py` - Network automation tasks
+  - `operations.py` - Backup/restore operations
+  - `inventory.py` - Device inventory management
+  - `proxy.py` - Proxy routes to Rust backend
+  - `jsnapy.py` - JSNAPy validation (V2)
+  - `upgrade.py` - Device software upgrades
+
+### Data Flow
+1. Frontend requests navigation config from `/api/navigation/*` (proxied to Rust)
+2. Rust backend serves YAML files from `shared/data/` directory
+3. Frontend dynamically creates routes based on configuration
+4. Real-time updates flow through Redis → Rust backend → Frontend via WebSocket
+5. Background jobs are queued to Redis and processed by FastAPI worker
+
+## Important Configuration
+
+### Environment Variables
+
+Configuration is managed through a `.env` file (see `.env.example` for template):
+
+**For Local Development (Default):**
+```bash
+SERVER_HOST=localhost
+API_GATEWAY_PORT=8000
+RUST_WS_PORT=3100
+FRONTEND_PORT=5173
+PROTOCOL=http
+WS_PROTOCOL=ws
+```
+
+**For Server Deployment:**
+```bash
+SERVER_HOST=192.168.1.100  # or your domain name
+# If using SSL:
+PROTOCOL=https
+WS_PROTOCOL=wss
+```
+
+**Frontend Environment Variables** (auto-generated from .env):
+- `VITE_API_GATEWAY_URL` - Frontend API URL
+- `VITE_RUST_WS_URL` - Frontend WebSocket URL
+
+**Internal Service Variables:**
+- `RUST_WS_URL` - WebSocket connection URL for API Gateway (internal)
+- `REDIS_HOST`, `REDIS_PORT` - Redis connection settings (internal)
+
+**For more details, see:**
+- `SERVER_CONFIG.md` - Quick server configuration guide
+- `DEPLOYMENT_GUIDE.md` - Comprehensive server deployment
+- `MIGRATION_GUIDE.md` - Moving to a new computer
+
+### Volume Mounts (Docker)
+- `./shared/data:/app/shared/data` - YAML configuration files
+- `./shared/schemas:/app/shared/schemas` - JSON schemas for validation
+- `./frontend/py_scripts:/app/app_gateway/py_scripts` - Python automation scripts
+- `temp_upload_storage:/tmp/uploads` - Temporary file storage
+
+## Key Development Notes
+
+### Dynamic Navigation System
+The application uses a dynamic navigation system where routes are defined in YAML files and loaded at runtime. Static routes (like Operations) are hard-coded in `App.jsx`, while dynamic routes are fetched from the Rust backend.
+
+### WebSocket Integration
+- Rust backend manages WebSocket connections and broadcasts messages
+- Redis pub/sub enables real-time communication between all services
+- Frontend connects to WebSocket for live updates
+
+### Worker Pattern
+Background jobs (network automation tasks) are handled by a dedicated FastAPI worker service that polls Redis for new tasks, ensuring the main API Gateway remains responsive. Jobs use the pattern `ws_channel:job:{uuid}` for WebSocket communication and follow a specific event structure for status updates.
+
+### Multi-network Architecture
+- `internal_net`: Internal service communication
+- `crpd-net`: External network for device communication (cRPD lab integration)
+
+### Router Priority System
+In `app_gateway/main.py`, router registration order is critical for route resolution. More specific routes must be registered before generic ones to prevent conflicts.
+
+### Job Processing Pattern
+Background jobs follow a specific communication pattern:
+1. Job queued to Redis with UUID
+2. Worker processes job and publishes status via WebSocket channel
+3. Stream processing distinguishes between JSON events (status updates) and stderr logs (command output)
+4. Frontend receives real-time updates through WebSocket connection
+
+### JSNAPy Integration
+- JSNAPy configuration files stored in `shared/jsnapy/config/`
+- Test snapshots saved to `shared/jsnapy/snapshots/`
+- Debug logs available in `shared/jsnapy/logs/`
+
+## Development Workflow
+
+### Local Development Setup
+1. Start Redis and wait for it to be ready: `docker-compose up -d redis_broker`
+2. Start Rust backend: `cd backend && cargo run` (serves navigation YAMLs and WebSocket)
+3. Start API Gateway: `cd app_gateway && uvicorn main:app --host 0.0.0.0 --port 8000 --reload`
+4. Start Frontend: `cd frontend && npm run dev`
+5. Start Worker (for background jobs): `cd app_gateway && python worker.py`
+
+### Testing
+Integration testing requires all services running due to microservices architecture.
+
+#### Frontend Tests
+```bash
+cd frontend
+npm test          # Run tests if configured
+```
+
+#### Backend Tests
+```bash
+cd backend
+cargo test        # Run Rust tests
+```
+
+### API Testing
+API documentation available at:
+- Swagger UI: http://localhost:8000/docs
+- ReDoc: http://localhost:8000/redoc
+- Debug routes: http://localhost:8000/debug/routes
+
+## Common Issues
+
+1. **Redis Connection**: Ensure Redis is running before starting other services
+2. **WebSocket Fails**: Check Rust backend is accessible from API Gateway
+3. **Dynamic Routes Not Loading**: Verify YAML files exist in `shared/data/`
+4. **JSNAPy Failures**: Check mount permissions for jsnapy directories
+5. **Permission Issues**: Ensure Docker volumes have proper read/write permissions
+6. **Route Conflicts**: Generic routes catching specific paths - check router registration order
+7. **Job Status Not Updating**: Verify WebSocket connection and Redis pub/sub connectivity
+8. **Worker Not Processing Jobs**: Check worker logs and Redis job queue status
+
+## Debugging Workflows
+
+### Cross-Service Debugging
+- Use Redis pub/sub channels to trace message flow between services
+- WebSocket connections can be monitored via browser dev tools (Network tab)
+- API Gateway logs show both HTTP requests and WebSocket client activity
+- Rust backend logs show WebSocket connection management and YAML serving
+
+### Job Processing Debugging
+1. Check job appears in Redis queue after API submission
+2. Monitor worker logs for job pickup and execution
+3. Verify WebSocket channel `ws_channel:job:{uuid}` receives status updates
+4. Check frontend receives real-time job status updates

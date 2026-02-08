@@ -1,0 +1,25 @@
+items:
+  # This item is the execution workflow page. It should be unique.
+  - id: new_backup
+    title: "New Backup Job"
+    subtitle: "Configure & run backup"
+    icon: "Download"
+    route: "/backups/new-job"
+
+  - id: restore
+    title: "Restore Device"
+    subtitle: "Restore from backup"
+    icon: "Upload"
+    route: "/restore"
+
+  - id: history
+    title: "Backup History"
+    subtitle: "View backup records"
+    icon: "History"
+    route: "/backups"
+
+  - id: settings
+    title: "Backup Settings"
+    subtitle: "Configure backup options"
+    icon: "Settings"
+    route: "/backup/new"
