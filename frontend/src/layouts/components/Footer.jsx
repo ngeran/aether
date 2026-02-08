@@ -35,19 +35,17 @@ const Footer = () => {
 
   // Copyright text uses muted colors
   const renderCopyright = () => (
-    <div className="text-sm text-muted-foreground">©2025 Aether</div>
+    <div className="text-sm text-muted-foreground">©2026 | Aether</div>
   );
 
-  // Designer link uses primary color for accent
+  // Dashboard link uses primary color for accent
   const renderDesignerAttribution = () => (
-    <a
-      href="https://ngeranio.com"
-      target="_blank"
-      rel="noopener noreferrer"
+    <Link
+      to="/dashboard"
       className="text-sm text-muted-foreground hover:text-primary transition-colors"
     >
-      Design & Dev by <span className="font-semibold underline">nikos</span>
-    </a>
+      Dashboard
+    </Link>
   );
 
   // ================================================

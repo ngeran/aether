@@ -28,6 +28,7 @@ from app_gateway.api.routers import (
     code_upgrade,
     configuration_deployment,
     configuration_templates,
+    dashboard,  # <--- NEW: Dashboard Router
     device_storage,
     file_uploader,
     inventory,
@@ -265,6 +266,9 @@ logger.info("✅ Registered pre_checks router with prefix /api")
 
 app.include_router(reports.router, prefix="/api")
 logger.info("✅ Registered reports router with prefix /api")
+
+app.include_router(dashboard.router, prefix="/api")
+logger.info("✅ Registered dashboard router with prefix /api")
 
 logger.info("🎉 All specified routers have been processed for registration.")
 
