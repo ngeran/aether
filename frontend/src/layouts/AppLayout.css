@@ -5,12 +5,12 @@
 :root {
   --primary-color: #0066ff;
   --secondary-color: #00d4ff;
-  --dark-bg: #0a0a0a;
-  --dark-surface: #1a1a1a;
-  --mega-menu-bg: #3b4144e6;
+  --dark-bg: #000000;
+  --dark-surface: #0a0a0a;
+  --mega-menu-bg: #000000e6;
   --text-primary: #ffffff;
   --text-secondary: #a0a0a0;
-  --border-color: #2a2a2a;
+  --border-color: #1a1a1a;
   --nav-height: 72px; /* Used for Header height and main content padding */
   --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 
@@ -25,7 +25,7 @@
   --text-primary-rgb: 255, 255, 255;
   --text-secondary-rgb: 160, 160, 160;
   --primary-color-rgb: 0, 102, 255;
-  --border-color-rgb: 42, 42, 42;
+  --border-color-rgb: 26, 26, 26;
 }
 
 /* ================================================

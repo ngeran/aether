@@ -37,6 +37,7 @@ from app_gateway.api.routers import (
     operations,  # Backup and restore operations
     pre_checks,  # PreChecks for code upgrade validation
     proxy,  # Navigation proxy to Rust backend
+    reports,  # <--- NEW: Device Reports Router
     restore,
     sidebar_metadata,
     software_images,
@@ -261,6 +262,9 @@ logger.info("✅ Registered file_uploader router with prefix /api")
 
 app.include_router(pre_checks.router, prefix="/api")
 logger.info("✅ Registered pre_checks router with prefix /api")
+
+app.include_router(reports.router, prefix="/api")
+logger.info("✅ Registered reports router with prefix /api")
 
 logger.info("🎉 All specified routers have been processed for registration.")
 
