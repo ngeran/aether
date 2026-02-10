@@ -1,16 +1,16 @@
 
 /**
  * =============================================================================
- * CODE UPGRADES COMPONENT - MAIN ORCHESTRATOR v5.1.0
+ * CODE UPGRADES COMPONENT - MAIN ORCHESTRATOR v5.2.0
  * =============================================================================
  *
- * Centralized orchestration for device upgrade workflow
+ * Centralized orchestration for device upgrade workflow with OLED-Optimized Dark Theme
  *
- * ENHANCEMENTS v5.1.0 (2025-11-20 15:25:23 UTC):
- * - Fixed Upgrade tab remaining accessible after completion
- * - Tab no longer disables after upgrade completes
- * - User can review messages in Upgrade tab even after transitioning to Results
- * - Improved tab navigation logic for better UX
+ * ENHANCEMENTS v5.2.0 (2026-02-09):
+ * - OLED-optimized pure black theme for energy efficiency
+ * - Cyan/gradient accents matching Reporting section
+ * - Glassmorphism cards with backdrop-blur effects
+ * - Modern gradient buttons and progress bars
  *
  * WORKFLOW:
  * Configuration → Pre-Check (Execute) → Review → Upgrade → Results
@@ -18,6 +18,7 @@
  */
 
 import React, { useMemo, useCallback } from 'react';
+import { Zap } from 'lucide-react';
 
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -298,27 +299,60 @@ export default function CodeUpgrades() {
   // ==========================================================================
 
   return (
-    <div className="p-8 pt-6">
+    <div className="min-h-screen bg-white dark:bg-black">
       {/* ====================================================================
-          HEADER SECTION
+          HEADER SECTION - OLED Optimized
           ==================================================================== */}
-      <div className="flex items-center justify-between mb-2">
-        <div>
-          <h1 className="text-3xl font-bold tracking-tight">Code Upgrade Operation</h1>
-          <p className="text-muted-foreground">
-            Upgrade device operating system with pre-flight validation
-          </p>
-        </div>
+      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-black sticky top-0 z-10 backdrop-blur-sm bg-white/95 dark:bg-black/95">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-black dark:text-white mb-2 flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-600/10">
+                  <Zap className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />
+                </div>
+                Code Upgrade Operation
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Upgrade device operating system with pre-flight validation
+              </p>
+            </div>
 
-        {/* Reset button - only show when job is active */}
-        {jobStatus !== 'idle' && (
-          <Button onClick={resetWorkflow} variant="outline" size="sm">
-            Start New Upgrade
-          </Button>
-        )}
+            {/* Reset button - only show when job is active */}
+            {jobStatus !== 'idle' && (
+              <Button onClick={resetWorkflow} variant="outline" size="sm" className="card-hover">
+                Start New Upgrade
+              </Button>
+            )}
+          </div>
+
+          {/* Connection Status */}
+          <div className="flex items-center gap-4">
+            <div className={`px-4 py-2 rounded-xl border-2 flex items-center gap-2 transition-all duration-200 ${
+              isConnected
+                ? 'bg-green-50/50 dark:bg-green-950/20 border-green-500/30 text-green-700 dark:text-green-300'
+                : 'bg-red-50/50 dark:bg-red-950/20 border-red-500/30 text-red-700 dark:text-red-300'
+            }`}>
+              <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-500 pulse-glow' : 'bg-red-500'}`} />
+              <span className="text-sm font-medium">
+                {isConnected ? 'Connected' : 'Disconnected'}
+              </span>
+            </div>
+
+            {activeTab && (
+              <div className="px-4 py-2 rounded-xl bg-cyan-50/50 dark:bg-cyan-950/20 border border-cyan-500/30 text-cyan-700 dark:text-cyan-300">
+                <span className="text-sm font-medium">
+                  Phase: <span className="font-bold">{activeTab}</span>
+                </span>
+              </div>
+            )}
+          </div>
+        </div>
       </div>
 
-      <Separator className="mb-8" />
+      {/* Main Content */}
+      <div className="container mx-auto px-6 py-6">
+      <Separator className="mb-8 bg-gray-200 dark:bg-gray-800" />
 
       {/* ====================================================================
           MAIN TABS CONTAINER
@@ -328,7 +362,7 @@ export default function CodeUpgrades() {
         {/* ==================================================================
             TAB NAVIGATION - 5 TABS WITH IMPROVED ACCESSIBILITY
             ================================================================== */}
-        <TabsList className="grid w-full grid-cols-5 mb-6">
+        <TabsList className="grid w-full grid-cols-5 lg:w-[800px] mx-auto mb-6 bg-gray-100 dark:bg-black border border-gray-200 dark:border-gray-800 rounded-2xl p-1">
           {/* Tab 1: Configuration */}
           <TabsTrigger value="config" disabled={isTabDisabled('config')}>
             Configure
@@ -460,6 +494,7 @@ export default function CodeUpgrades() {
         </TabsContent>
 
       </Tabs>
+    </div>
     </div>
   );
 }

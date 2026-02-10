@@ -1,8 +1,8 @@
 /**
  * =============================================================================
  * FILE LOCATION: frontend/src/pages/Automation/Templates.jsx
- * DESCRIPTION:   Main UI for Template Deployment. 
- *                FIXED: Diff button visibility and black text styling.
+ * DESCRIPTION:   Main UI for Template Deployment with OLED-Optimized Dark Theme
+ * VERSION:       2.0.0 - OLED Pure Black Theme
  * =============================================================================
  */
 
@@ -379,28 +379,39 @@ export default function Templates() {
 
   return (
     <div className="min-h-screen bg-white dark:bg-black">
-      {/* HEADER */}
-      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-black sticky top-0 z-10">
-        <div className="container mx-auto px-6 py-4">
-          <div className="flex items-center justify-between mb-4">
+      {/* HEADER - OLED Optimized */}
+      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-black sticky top-0 z-10 backdrop-blur-sm bg-white/95 dark:bg-black/95">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center justify-between mb-6">
             <div>
-              <h1 className="text-2xl font-bold text-black dark:text-white">Template Deployment</h1>
-              <p className="text-sm text-gray-600 dark:text-gray-400">Configure and deploy network templates</p>
+              <h1 className="text-3xl font-bold text-black dark:text-white mb-2 flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-600/10">
+                  <FileCode className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />
+                </div>
+                Template Deployment
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Configure and deploy network templates
+              </p>
             </div>
           </div>
-          {/* Steps */}
-          <div className="flex items-center justify-center space-x-4">
+          {/* Steps - Modern OLED */}
+          <div className="flex items-center justify-center space-x-2 sm:space-x-4">
             {steps.map((step, idx) => (
               <div key={step.id} className="flex items-center">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center border-2 ${
-                  currentStep === step.id || currentStep > step.id 
-                  ? 'bg-black dark:bg-white border-black dark:border-white text-white dark:text-black' 
-                  : 'border-gray-300 text-gray-400'
+                <div className={`flex items-center justify-center w-12 h-12 rounded-2xl border-2 transition-all duration-300 ${
+                  currentStep === step.id || currentStep > step.id
+                  ? 'bg-gradient-to-br from-cyan-500 to-blue-600 border-cyan-500 text-white shadow-lg shadow-cyan-500/25'
+                  : 'border-gray-300 dark:border-gray-700 text-gray-400'
                 }`}>
-                  {currentStep > step.id ? <CheckCircle2 className="w-5 h-5" /> : <step.icon className="w-5 h-5" />}
+                  {currentStep > step.id ? <CheckCircle2 className="w-6 h-6" /> : <step.icon className="w-6 h-6" />}
                 </div>
-                <span className={`text-xs mt-2 ml-2 font-medium hidden md:block ${currentStep === step.id ? 'text-black dark:text-white' : 'text-gray-400'}`}>{step.name}</span>
-                {idx < steps.length - 1 && <div className="w-12 h-0.5 bg-gray-300 mx-2 hidden md:block" />}
+                <span className={`text-sm font-medium hidden sm:block transition-colors ml-3 ${
+                  currentStep === step.id ? 'text-black dark:text-white' : 'text-gray-400'
+                }`}>{step.name}</span>
+                {idx < steps.length - 1 && <div className={`w-16 h-0.5 hidden sm:block transition-all duration-300 ${
+                  currentStep > step.id ? 'bg-gradient-to-r from-cyan-500 to-blue-600' : 'bg-gray-300 dark:bg-gray-700'
+                }`} />}
               </div>
             ))}
           </div>
@@ -420,20 +431,20 @@ export default function Templates() {
             <div className="w-64 flex-shrink-0 space-y-3">
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400" />
-                <Input 
-                  placeholder="Search templates..." 
-                  value={searchQuery} 
-                  onChange={(e) => { setSearchQuery(e.target.value); setSelectedCategory(null); }} 
-                  className="pl-9"
+                <Input
+                  placeholder="Search templates..."
+                  value={searchQuery}
+                  onChange={(e) => { setSearchQuery(e.target.value); setSelectedCategory(null); }}
+                  className="pl-9 h-11 rounded-xl border-gray-200 dark:border-gray-700 focus:border-cyan-500 focus:ring-cyan-500/20 bg-white/50 dark:bg-black/50"
                 />
               </div>
-              <Card className="h-[calc(100%-3rem)]">
+              <Card className="h-[calc(100%-3rem)] glass-card rounded-2xl">
                 <CardContent className="p-0">
                   <ScrollArea className="h-[calc(100vh-28rem)]">
                     <div className="p-2 space-y-1">
-                      <Button 
-                        variant="ghost" 
-                        className={`w-full justify-start ${!selectedCategory ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+                      <Button
+                        variant="ghost"
+                        className={`w-full justify-start rounded-xl ${!selectedCategory ? 'bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20' : ''}`}
                         onClick={() => setSelectedCategory(null)}
                       >
                         All Templates
@@ -442,7 +453,7 @@ export default function Templates() {
                         <Button
                           key={cat.name}
                           variant="ghost"
-                          className={`w-full justify-start justify-between ${selectedCategory === cat.name ? 'bg-gray-100 dark:bg-gray-800' : ''}`}
+                          className={`w-full justify-start justify-between rounded-xl ${selectedCategory === cat.name ? 'bg-gradient-to-r from-cyan-50 to-blue-50 dark:from-cyan-950/20 dark:to-blue-950/20' : ''}`}
                           onClick={() => setSelectedCategory(cat.name)}
                         >
                           <span>{cat.name}</span>
@@ -456,22 +467,22 @@ export default function Templates() {
             </div>
 
             <div className="flex-1">
-               <Card className="h-full flex flex-col border-0 shadow-none">
+               <Card className="h-full flex flex-col border-0 shadow-none bg-transparent">
                  <ScrollArea className="h-full">
                    <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-4 pb-20">
                      {filteredCategories.map(cat => cat.templates.map(template => (
                        <button
                          key={template.path}
                          onClick={() => handleTemplateSelect(template)}
-                         className="group relative p-5 text-left border-2 border-gray-200 dark:border-gray-800 rounded-lg hover:border-black dark:hover:border-white transition-all bg-white dark:bg-black hover:shadow-md"
+                         className="group relative p-5 text-left border-2 border-gray-200 dark:border-gray-800 rounded-xl hover:border-cyan-500/50 transition-all bg-gradient-to-br from-white to-gray-50 dark:from-gray-900 dark:to-black hover:shadow-lg hover:shadow-cyan-500/10"
                        >
-                         <div className="absolute top-4 right-4 p-2 rounded bg-gray-100 dark:bg-gray-900 group-hover:bg-black group-hover:text-white dark:group-hover:bg-white dark:group-hover:text-black transition-colors">
+                         <div className="absolute top-4 right-4 p-2 rounded-lg bg-gray-100 dark:bg-gray-800 group-hover:bg-gradient-to-br group-hover:from-cyan-500 group-hover:to-blue-600 group-hover:text-white dark:group-hover:text-white transition-all">
                            <FileCode className="w-4 h-4" />
                          </div>
                          <div className="mt-4">
-                           <h4 className="font-semibold truncate pr-8">{template.name.replace('.j2', '')}</h4>
-                           <p className="text-xs text-gray-500 font-mono mt-1 truncate">{cat.name}</p>
-                           <div className="flex items-center gap-1 text-xs font-medium mt-4 text-gray-400 group-hover:text-black dark:group-hover:text-white">
+                           <h4 className="font-semibold truncate pr-8 text-black dark:text-white">{template.name.replace('.j2', '')}</h4>
+                           <p className="text-xs text-gray-500 dark:text-gray-400 font-mono mt-1 truncate">{cat.name}</p>
+                           <div className="flex items-center gap-1 text-xs font-medium mt-4 text-gray-400 group-hover:text-cyan-600 dark:group-hover:text-cyan-400">
                              Configure <ArrowRight className="w-3 h-3" />
                            </div>
                          </div>
@@ -487,26 +498,26 @@ export default function Templates() {
         {/* STEP 2: CONFIGURATION */}
         {currentStep === 2 && selectedTemplate && (
           <div className="space-y-4">
-            <Card>
+            <Card className="glass-card rounded-2xl card-hover">
               <CardHeader>
                 <div className="flex justify-between items-center">
                     <div>
-                        <CardTitle>{selectedTemplate.name.replace('.j2', '')}</CardTitle>
+                        <CardTitle className="text-black dark:text-white">{selectedTemplate.name.replace('.j2', '')}</CardTitle>
                         <CardDescription>Configure variables and target device</CardDescription>
                     </div>
-                    <Button variant="outline" onClick={() => setCurrentStep(1)} size="sm">Change Template</Button>
+                    <Button variant="outline" onClick={() => setCurrentStep(1)} size="sm" className="card-hover">Change Template</Button>
                 </div>
               </CardHeader>
               <CardContent className="space-y-6">
                 {Object.keys(formValues).length > 0 ? (
                     <div className="space-y-4">
-                        <h3 className="text-sm font-semibold flex items-center gap-2">
-                            <Terminal className="w-4 h-4" /> Template Variables
+                        <h3 className="text-sm font-semibold flex items-center gap-2 text-black dark:text-white">
+                            <Terminal className="w-4 h-4 text-cyan-600 dark:text-cyan-400" /> Template Variables
                         </h3>
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gray-50 dark:bg-gray-900/50 rounded-lg border border-gray-100 dark:border-gray-800">
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 bg-gradient-to-br from-gray-50 to-white dark:from-gray-900 dark:to-black rounded-xl border border-gray-200 dark:border-gray-800">
                             {Object.keys(formValues).map((varName) => (
                                 <div key={varName} className="space-y-1.5">
-                                    <Label htmlFor={varName} className="text-xs font-bold uppercase text-gray-500 tracking-wide">
+                                    <Label htmlFor={varName} className="text-xs font-bold uppercase text-gray-500 dark:text-gray-400 tracking-wide">
                                         {varName.replace(/_/g, ' ')}
                                     </Label>
                                     <Input
@@ -514,23 +525,24 @@ export default function Templates() {
                                         value={formValues[varName] || ''}
                                         onChange={(e) => handleInputChange(varName, e.target.value)}
                                         placeholder={`Value for {{ ${varName} }}`}
+                                        className="border-gray-200 dark:border-gray-700 focus:border-cyan-500 focus:ring-cyan-500/20 bg-white/50 dark:bg-black/50"
                                     />
                                 </div>
                             ))}
                         </div>
                     </div>
                 ) : (
-                    <div className="p-4 bg-blue-50 text-blue-700 rounded-lg text-sm flex items-center gap-2">
+                    <div className="p-4 bg-gradient-to-br from-blue-50 to-cyan-50 dark:from-blue-950/30 dark:to-cyan-950/30 text-blue-700 dark:text-blue-300 rounded-xl text-sm flex items-center gap-2 border border-blue-200 dark:border-blue-800">
                         <CheckCircle2 className="w-4 h-4"/> No variables detected in this template.
                     </div>
                 )}
-                <Separator />
+                <Separator className="bg-gray-200 dark:bg-gray-800" />
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <DeviceTargetSelector parameters={parameters} onParamChange={handleParamChange} />
                     <DeviceAuthFields parameters={parameters} onParamChange={handleParamChange} />
                 </div>
                 <div className="flex justify-end pt-4">
-                  <Button onClick={generateConfig} disabled={!selectedTemplate}>
+                  <Button onClick={generateConfig} disabled={!selectedTemplate} className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/25 transition-all duration-300">
                     Generate Configuration <ArrowRight className="ml-2 w-4 h-4" />
                   </Button>
                 </div>
@@ -542,25 +554,25 @@ export default function Templates() {
         {/* STEP 3: REVIEW */}
         {currentStep === 3 && generatedConfig && (
           <div className="space-y-4">
-            <Card>
+            <Card className="glass-card rounded-2xl card-hover">
               <CardHeader>
                 <div className="flex justify-between">
-                  <CardTitle>Review Configuration</CardTitle>
+                  <CardTitle className="text-black dark:text-white">Review Configuration</CardTitle>
                   <div className="flex gap-2">
-                    <Button variant="outline" size="sm" onClick={() => setCurrentStep(2)}>Back to Edit</Button>
-                    <Button variant="outline" size="sm" onClick={copyToClipboard}>
+                    <Button variant="outline" size="sm" onClick={() => setCurrentStep(2)} className="card-hover">Back to Edit</Button>
+                    <Button variant="outline" size="sm" onClick={copyToClipboard} className="card-hover">
                         {copied ? <Check className="w-4 h-4 mr-1" /> : <Copy className="w-4 h-4 mr-1" />} Copy
                     </Button>
-                    <Button variant="outline" size="sm" onClick={downloadConfig}><Download className="w-4 h-4 mr-1"/> Download</Button>
+                    <Button variant="outline" size="sm" onClick={downloadConfig} className="card-hover"><Download className="w-4 h-4 mr-1"/> Download</Button>
                   </div>
                 </div>
               </CardHeader>
               <CardContent>
-                <ScrollArea className="h-96 w-full rounded-lg border border-gray-200 dark:border-gray-800 bg-gray-50 dark:bg-gray-950">
+                <ScrollArea className="h-96 w-full rounded-xl border border-gray-200 dark:border-gray-800 bg-gradient-to-br from-gray-50 to-white dark:from-gray-950 dark:to-black">
                   <pre className="p-4 text-xs font-mono text-black dark:text-white">{generatedConfig}</pre>
                 </ScrollArea>
                 <div className="flex justify-end gap-2 pt-4">
-                  <Button onClick={() => setCurrentStep(4)}>Proceed to Deployment <ArrowRight className="w-4 h-4 ml-2" /></Button>
+                  <Button onClick={() => setCurrentStep(4)} className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/25 transition-all duration-300">Proceed to Deployment <ArrowRight className="w-4 h-4 ml-2" /></Button>
                 </div>
               </CardContent>
             </Card>
@@ -570,24 +582,24 @@ export default function Templates() {
         {/* STEP 4: DEPLOY */}
         {currentStep === 4 && (
           <div className="space-y-4">
-            <Card>
+            <Card className="glass-card rounded-2xl card-hover">
               <CardHeader>
-                <CardTitle>Deploy Configuration</CardTitle>
+                <CardTitle className="text-black dark:text-white">Deploy Configuration</CardTitle>
                 <CardDescription>
-                   {!deploying && !deploymentResult 
-                     ? "Review the execution plan and confirm to proceed." 
+                   {!deploying && !deploymentResult
+                     ? "Review the execution plan and confirm to proceed."
                      : "Configuration deployment in progress."}
                 </CardDescription>
               </CardHeader>
-              
+
               <CardContent className="space-y-6">
-                {/* 1. Execution Plan */}
+                {/* 1. Execution Plan - OLED Optimized */}
                 {!deploying && !deploymentResult && (
-                  <div className="bg-zinc-50 dark:bg-zinc-900 p-4 rounded-lg border border-zinc-200 dark:border-zinc-800 space-y-3">
-                     <div className="flex items-center gap-2 font-semibold text-sm text-zinc-900 dark:text-zinc-100">
-                        <Terminal className="w-4 h-4" /> Execution Plan
+                  <div className="bg-gradient-to-br from-cyan-50 to-blue-50 dark:from-gray-900 dark:to-gray-950 p-6 rounded-2xl border border-cyan-200 dark:border-cyan-900/50 space-y-3">
+                     <div className="flex items-center gap-3 font-semibold text-sm text-cyan-900 dark:text-cyan-100">
+                        <Terminal className="w-5 h-5 text-cyan-600 dark:text-cyan-400" /> Execution Plan
                      </div>
-                     <ul className="text-sm space-y-2 text-zinc-600 dark:text-zinc-400 list-disc pl-5">
+                     <ul className="text-sm space-y-2 text-gray-700 dark:text-gray-300 list-disc pl-5">
                         <li>Check connectivity to <strong>{parameters.hostname || parameters.inventory_file}</strong></li>
                         <li>Lock configuration database</li>
                         <li>Load <strong>{configContext}</strong> configuration ({generatedConfig.split('\n').length} lines)</li>
@@ -596,55 +608,55 @@ export default function Templates() {
                         <li>Commit changes to active configuration</li>
                      </ul>
                      <div className="flex justify-center pt-4">
-                        <Button onClick={deployTemplate} size="lg" className="bg-black hover:bg-gray-800 text-white dark:bg-white dark:text-black">
+                        <Button onClick={deployTemplate} size="lg" className="bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-xl shadow-cyan-500/25 transition-all duration-300">
                           <Upload className="w-5 h-5 mr-2" /> Confirm & Deploy
                         </Button>
                      </div>
                   </div>
                 )}
 
-                {/* 2. STATUS BAR */}
+                {/* 2. STATUS BAR - OLED Optimized */}
                 {(deploying || deploymentResult) && (
-                   <div className={`flex flex-col md:flex-row items-center justify-between p-4 rounded-lg border gap-4 ${
-                        deploymentResult?.success ? 'bg-green-50 border-green-200 text-green-700' : 
-                        deploymentResult?.success === false ? 'bg-red-50 border-red-200 text-red-700' : 
-                        'bg-zinc-50 border-zinc-200 text-zinc-700 dark:bg-zinc-900 dark:border-zinc-800 dark:text-zinc-300'
+                   <div className={`flex flex-col md:flex-row items-center justify-between p-4 rounded-2xl border gap-4 backdrop-blur-sm ${
+                        deploymentResult?.success ? 'bg-green-50/50 dark:bg-green-950/20 border-green-500/30 text-green-700 dark:text-green-300' :
+                        deploymentResult?.success === false ? 'bg-red-50/50 dark:bg-red-950/20 border-red-500/30 text-red-700 dark:text-red-300' :
+                        'bg-cyan-50/50 dark:bg-cyan-950/20 border-cyan-500/30 text-cyan-700 dark:text-cyan-300'
                    }`}>
                       <div className="flex items-center gap-3 w-full md:w-auto">
-                          {deploying ? <Loader2 className="animate-spin w-5 h-5" /> : 
-                           deploymentResult?.success ? <CheckCircle2 className="w-5 h-5" /> : 
+                          {deploying ? <Loader2 className="animate-spin w-5 h-5" /> :
+                           deploymentResult?.success ? <CheckCircle2 className="w-5 h-5" /> :
                            <AlertCircle className="w-5 h-5" />}
                           <span className="font-medium truncate">
                             {deploying ? (activeStep || "Initializing...") : deploymentResult?.message}
                           </span>
                       </div>
-                      
+
                       {/* ACTION TOOLBAR: DIFF & DEBUG */}
                       <div className="flex items-center gap-2 w-full md:w-auto justify-end">
                           {/* VIEW CHANGES BUTTON */}
                           {diffData && (
-                            <Button 
-                              variant="outline" 
-                              size="sm" 
+                            <Button
+                              variant="outline"
+                              size="sm"
                               onClick={() => setShowDiff(true)}
-                              className="bg-white dark:bg-black hover:bg-gray-100 border-zinc-300 text-zinc-900"
+                              className="bg-white dark:bg-black hover:bg-gray-100 dark:hover:bg-gray-800 border-cyan-500/30 text-cyan-900 dark:text-cyan-100"
                             >
-                              <FileDiff className="w-4 h-4 mr-2" /> 
+                              <FileDiff className="w-4 h-4 mr-2" />
                               Changes
                             </Button>
                           )}
-                          
+
                           {/* DEBUG BUTTON */}
                           <Button
                             variant={showTechnical ? "secondary" : "outline"}
                             size="sm"
                             onClick={() => setShowTechnical(!showTechnical)}
-                            className={`border-zinc-300 ${showTechnical 
-                              ? "bg-zinc-200 dark:bg-zinc-800 text-zinc-900" 
-                              : "bg-white dark:bg-black text-zinc-600"}`}
+                            className={`border-cyan-500/30 ${showTechnical
+                              ? "bg-cyan-100 dark:bg-cyan-900/40 text-cyan-900 dark:text-cyan-100"
+                              : "bg-white dark:bg-black text-cyan-700 dark:text-cyan-300"}`}
                             title="Toggle Raw/Technical Logs"
                           >
-                             <Bug className={`w-4 h-4 ${showTechnical ? "text-blue-600" : "text-current"}`} />
+                             <Bug className={`w-4 h-4 ${showTechnical ? "text-cyan-600 dark:text-cyan-400" : "text-current"}`} />
                              <span className="ml-2 hidden md:inline">Debug</span>
                           </Button>
                       </div>

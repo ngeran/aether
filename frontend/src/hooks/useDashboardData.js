@@ -29,16 +29,16 @@ export function useDashboardData(refreshInterval = 30000) { // Default 30 second
                 fetch(`${API_URL}/api/dashboard/recent-jobs?limit=10`)
             ]);
 
-            // Parse responses
+            // Parse responses and extract data
             const stats = statsRes.ok ? await statsRes.json() : null;
             const health = healthRes.ok ? await healthRes.json() : null;
             const jobs = jobsRes.ok ? await jobsRes.json() : null;
 
             setData({
-                stats,
-                health,
-                recentJobs: jobs,
-                activity: jobs // Use jobs as activity for now
+                stats: stats?.data || null,
+                health: health?.data || null,
+                recentJobs: jobs?.data || null,
+                activity: jobs?.data || null // Use jobs as activity for now
             });
 
             setLastUpdated(new Date());

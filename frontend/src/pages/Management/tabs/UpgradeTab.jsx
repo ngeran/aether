@@ -54,7 +54,7 @@ import { shouldShowToUser } from '../utils/messageFiltering';
 function UpgradeStatusBadge({ status, isRunning }) {
   if (isRunning) {
     return (
-      <Badge variant="default" className="bg-blue-600 animate-pulse">
+      <Badge className="bg-gradient-to-r from-cyan-500 to-blue-600 text-white animate-pulse shadow-lg">
         <Loader2 className="h-3 w-3 mr-1 animate-spin" />
         Upgrading...
       </Badge>
@@ -63,7 +63,7 @@ function UpgradeStatusBadge({ status, isRunning }) {
 
   if (status === 'success') {
     return (
-      <Badge variant="default" className="bg-green-600">
+      <Badge className="bg-gradient-to-r from-green-500 to-emerald-600 text-white">
         <CheckCircle className="h-3 w-3 mr-1" />
         Completed
       </Badge>
@@ -72,7 +72,7 @@ function UpgradeStatusBadge({ status, isRunning }) {
 
   if (status === 'failed') {
     return (
-      <Badge variant="destructive">
+      <Badge variant="destructive" className="bg-red-600">
         <XCircle className="h-3 w-3 mr-1" />
         Failed
       </Badge>
@@ -80,7 +80,7 @@ function UpgradeStatusBadge({ status, isRunning }) {
   }
 
   return (
-    <Badge variant="outline">
+    <Badge variant="outline" className="border-gray-300 dark:border-gray-700 text-gray-700 dark:text-gray-300">
       <AlertCircle className="h-3 w-3 mr-1" />
       Idle
     </Badge>

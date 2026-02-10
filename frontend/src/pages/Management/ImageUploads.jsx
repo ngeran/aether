@@ -1,8 +1,8 @@
 /**
  * =============================================================================
  * FILE LOCATION: frontend/src/pages/Management/ImageUploads.jsx
- * DESCRIPTION:   Production Image Upload Component (Refactored)
- * VERSION:       3.0.6 - Direct Progress Handling Fallback
+ * DESCRIPTION:   Production Image Upload Component with OLED-Optimized Dark Theme
+ * VERSION:       4.0.0 - OLED Pure Black Theme
  * =============================================================================
  */
 
@@ -10,7 +10,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import {
   Loader2, HardDrive, Upload, CheckCircle2, XCircle,
   AlertCircle, Terminal, FileText, FileCheck,
-  Server, CloudUpload
+  Server, CloudUpload, ArrowRight
 } from 'lucide-react';
 
 // UI Components
@@ -29,7 +29,7 @@ import LiveLogViewer from '@/components/realTimeProgress/LiveLogViewer';
 
 // Hooks
 import { useJobWebSocket } from '@/hooks/useJobWebSocket';
-import useWorkflowMessages from '@/hooks/useWorkflowMessages'; 
+import useWorkflowMessages from '@/hooks/useWorkflowMessages';
 
 // =============================================================================
 // SECTION 1: CONFIGURATION
@@ -45,6 +45,15 @@ const UPLOAD_STEPS = {
   UPLOAD: 4,
   COMPLETE: 5
 };
+
+// Step configuration with modern styling
+const steps = [
+  { id: UPLOAD_STEPS.FILE_SELECTION, label: 'Select File', icon: FileCheck },
+  { id: UPLOAD_STEPS.DEVICE_CONFIG, label: 'Device Config', icon: Server },
+  { id: UPLOAD_STEPS.STORAGE_VALIDATION, label: 'Storage Check', icon: HardDrive },
+  { id: UPLOAD_STEPS.UPLOAD, label: 'Upload', icon: Upload },
+  { id: UPLOAD_STEPS.COMPLETE, label: 'Complete', icon: CheckCircle2 }
+];
 
 // =============================================================================
 // SECTION 2: COMPONENT DEFINITION
@@ -307,9 +316,9 @@ export default function ImageUploads({
   // ===========================================================================
 
   const getStorageStatusIcon = () => {
-    if (isCheckingStorage) return <Loader2 className="h-5 w-5 animate-spin text-gray-600" />;
-    if (storageCheckError || (storageCheck && !storageCheck.has_sufficient_space)) return <XCircle className="h-5 w-5 text-red-600" />;
-    if (storageCheck && storageCheck.has_sufficient_space) return <CheckCircle2 className="h-5 w-5 text-green-600" />;
+    if (isCheckingStorage) return <Loader2 className="h-5 w-5 animate-spin text-cyan-600 dark:text-cyan-400" />;
+    if (storageCheckError || (storageCheck && !storageCheck.has_sufficient_space)) return <XCircle className="h-5 w-5 text-red-600 dark:text-red-400" />;
+    if (storageCheck && storageCheck.has_sufficient_space) return <CheckCircle2 className="h-5 w-5 text-green-600 dark:text-green-400" />;
     return <HardDrive className="h-5 w-5 text-gray-400" />;
   };
 
@@ -322,10 +331,10 @@ export default function ImageUploads({
   };
 
   const getStorageStatusColor = () => {
-    if (isCheckingStorage) return 'border-gray-400 bg-gray-50';
-    if (storageCheckError || (storageCheck && !storageCheck.has_sufficient_space)) return 'border-red-200 bg-red-50';
-    if (storageCheck && storageCheck.has_sufficient_space) return 'border-green-200 bg-green-50';
-    return 'border-gray-200 bg-gray-50';
+    if (isCheckingStorage) return 'border-cyan-500/30 bg-cyan-50/50 dark:bg-cyan-950/20';
+    if (storageCheckError || (storageCheck && !storageCheck.has_sufficient_space)) return 'border-red-500/30 bg-red-50/50 dark:bg-red-950/20';
+    if (storageCheck && storageCheck.has_sufficient_space) return 'border-green-500/30 bg-green-50/50 dark:bg-green-950/20';
+    return 'border-gray-300 dark:border-gray-700 bg-gray-50/50 dark:bg-gray-900/50';
   };
 
   const formatFileSize = (bytes) => {
@@ -340,187 +349,234 @@ export default function ImageUploads({
   // ===========================================================================
 
   return (
-    <div className="w-full max-w-7xl mx-auto p-6 space-y-6">
-      {/* Header */}
-      <div className="flex items-center justify-between">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900 flex items-center gap-3">
-            <CloudUpload className="h-8 w-8 text-gray-900" />
-            Image Upload Workflow
-          </h1>
-          <p className="text-sm text-gray-600 mt-1">
-            Upload firmware images and configuration files with pre-validation.
-          </p>
-        </div>
-        <div className="flex items-center gap-3">
-          <Badge variant={isConnected ? "success" : "destructive"} className="text-sm">
-            {isConnected ? '🟢 WS Connected' : '🔴 WS Disconnected'}
-          </Badge>
-          {uploadComplete && (
-            <Badge variant="success" className="text-sm">✅ Upload Complete</Badge>
-          )}
-        </div>
-      </div>
-      <Separator />
-
-      {/* Progress Steps */}
-      <Card>
-        <CardContent className="p-6">
-          <div className="flex items-center justify-between">
-            {[
-              { step: UPLOAD_STEPS.FILE_SELECTION, label: '1. Select File', icon: FileCheck },
-              { step: UPLOAD_STEPS.DEVICE_CONFIG, label: '2. Device Config', icon: Server },
-              { step: UPLOAD_STEPS.STORAGE_VALIDATION, label: '3. Storage Check', icon: HardDrive },
-              { step: UPLOAD_STEPS.UPLOAD, label: '4. Upload', icon: Upload },
-              { step: UPLOAD_STEPS.COMPLETE, label: '5. Complete', icon: CheckCircle2 }
-            ].map(({ step, label, icon: Icon }, index) => (
-              <React.Fragment key={step}>
-                <div className={`flex flex-col items-center w-1/5 text-center ${currentStep >= step ? 'text-gray-900' : 'text-gray-400'}`}>
-                  <div className={`flex items-center justify-center w-10 h-10 rounded-full border-2 ${
-                    currentStep >= step ? 'bg-gray-900 border-gray-900 text-white' : 'border-gray-300 bg-white'
-                  }`}>
-                    {currentStep > step ? <CheckCircle2 className="h-5 w-5" /> : <Icon className="h-5 w-5" />}
-                  </div>
-                  <span className="text-xs font-medium mt-2 hidden sm:block">{label}</span>
-                  {currentStep === step && <div className="w-2 h-2 bg-gray-900 rounded-full mt-1" />}
+    <div className="min-h-screen bg-white dark:bg-black">
+      {/* HEADER */}
+      <div className="border-b border-gray-200 dark:border-gray-800 bg-white dark:bg-black sticky top-0 z-10 backdrop-blur-sm bg-white/95 dark:bg-black/95">
+        <div className="container mx-auto px-6 py-6">
+          <div className="flex items-center justify-between mb-6">
+            <div>
+              <h1 className="text-3xl font-bold text-black dark:text-white mb-2 flex items-center gap-3">
+                <div className="p-2 rounded-xl bg-gradient-to-br from-cyan-500/10 to-blue-600/10">
+                  <CloudUpload className="w-8 h-8 text-cyan-600 dark:text-cyan-400" />
                 </div>
-                {index < 4 && <div className={`flex-1 h-1 mx-2 sm:mx-4 ${currentStep > step ? 'bg-gray-900' : 'bg-gray-200'}`} />}
-              </React.Fragment>
+                Image Upload Workflow
+              </h1>
+              <p className="text-sm text-gray-600 dark:text-gray-400">
+                Upload firmware images and configuration files with pre-validation.
+              </p>
+            </div>
+            <div className="flex items-center gap-3">
+              <Badge variant={isConnected ? "success" : "destructive"} className="text-sm">
+                {isConnected ? '🟢 WS Connected' : '🔴 WS Disconnected'}
+              </Badge>
+              {uploadComplete && (
+                <Badge variant="success" className="text-sm">✅ Upload Complete</Badge>
+              )}
+            </div>
+          </div>
+
+          {/* Steps - Modern OLED Styling */}
+          <div className="flex items-center justify-center space-x-2 sm:space-x-4">
+            {steps.map((step, idx) => (
+              <div key={step.id} className="flex items-center">
+                <div className={`flex items-center justify-center w-12 h-12 rounded-2xl border-2 transition-all duration-300 ${
+                  currentStep === step.id || currentStep > step.id
+                    ? 'bg-gradient-to-br from-cyan-500 to-blue-600 border-cyan-500 text-white shadow-lg shadow-cyan-500/25'
+                    : 'border-gray-300 dark:border-gray-700 text-gray-400'
+                }`}>
+                  {currentStep > step.id ? (
+                    <CheckCircle2 className="w-6 h-6" />
+                  ) : (
+                    <step.icon className="w-6 h-6" />
+                  )}
+                </div>
+                <span className={`text-sm font-medium hidden sm:block transition-colors ml-3 ${
+                  currentStep === step.id ? 'text-black dark:text-white' : 'text-gray-400'
+                }`}>{step.label}</span>
+                {idx < steps.length - 1 && (
+                  <div className={`w-16 h-0.5 hidden sm:block transition-all duration-300 ${
+                    currentStep > step.id ? 'bg-gradient-to-r from-cyan-500 to-blue-600' : 'bg-gray-300 dark:bg-gray-700'
+                  }`} />
+                )}
+              </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        </div>
+      </div>
 
-      {/* Main Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="container mx-auto px-6 py-8">
+        {/* Main Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
 
-        {/* Step 1: File */}
-        <Card className={currentStep >= UPLOAD_STEPS.FILE_SELECTION ? 'border-gray-900 shadow-lg' : 'border-gray-200'}>
-          <CardHeader className="pb-4 bg-gray-50/50">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <FileCheck className="h-5 w-5 text-gray-900" />
-              1. Select File
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-6">
-            <FileSelection
-              selectedFile={selectedFile}
-              setSelectedFile={setSelectedFile}
-              isRunning={isRunning || isUploadingResolved}
-            />
-          </CardContent>
-        </Card>
-
-        {/* Step 2: Config */}
-        <Card className={currentStep >= UPLOAD_STEPS.DEVICE_CONFIG ? 'border-gray-900 shadow-lg' : 'border-gray-200'}>
-          <CardHeader className="pb-4 bg-gray-50/50">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <Server className="h-5 w-5 text-gray-900" />
-              2. Device Configuration
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4 pt-6">
-            <DeviceTargetSelector parameters={parameters} onParamChange={setParameters} />
-            <Separator />
-            <DeviceAuthFields parameters={parameters} onParamChange={setParameters} />
-          </CardContent>
-        </Card>
-
-        {/* Step 3: Logs */}
-        <Card className="border-gray-200">
-          <CardHeader className="pb-4 bg-gray-50/50">
-             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2 text-lg text-gray-900">
-                <Terminal className="h-5 w-5 text-gray-900" />
-                Live Execution Log
+          {/* Step 1: File Selection */}
+          <Card className={`glass-card rounded-2xl card-hover ${currentStep >= UPLOAD_STEPS.FILE_SELECTION ? 'border-cyan-500/30' : 'border-gray-200 dark:border-gray-800'}`}>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-lg">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/10 to-blue-600/10">
+                  <FileCheck className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                </div>
+                1. Select File
               </CardTitle>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => setShowTechnicalLogs(!showTechnicalLogs)}
-                className="text-xs text-gray-600"
-              >
-                {showTechnicalLogs ? 'Hide Debug' : 'Show Debug'}
-              </Button>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <LiveLogViewer
-              logs={terminalLogs}
-              isConnected={isConnected}
-              height="h-[350px]"
-              showTechnical={showTechnicalLogs}
-              isDarkTheme={true}
-            />
-          </CardContent>
-        </Card>
+            </CardHeader>
+            <CardContent className="pt-6">
+              <FileSelection
+                selectedFile={selectedFile}
+                setSelectedFile={setSelectedFile}
+                isRunning={isRunning || isUploadingResolved}
+              />
+            </CardContent>
+          </Card>
 
-        {/* Step 4: Action */}
-        <Card className={currentStep >= UPLOAD_STEPS.STORAGE_VALIDATION ? 'border-gray-900 shadow-lg' : 'border-gray-200'}>
-          <CardHeader className="pb-4 bg-gray-50/50">
-            <CardTitle className="flex items-center gap-2 text-lg">
-              <HardDrive className="h-5 w-5 text-gray-900" />
-              3. Validation & Upload
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-6 pt-6">
-            {/* Status Box */}
-            <div className={`p-4 rounded-xl border-2 ${getStorageStatusColor()} space-y-3`}>
-              <div className="flex items-center justify-between">
-                <span className="font-bold flex items-center gap-2">
-                  {getStorageStatusIcon()} {getStorageStatusText()}
-                </span>
-                {isCheckingStorage && <Loader2 className="h-4 w-4 animate-spin" />}
+          {/* Step 2: Device Configuration */}
+          <Card className={`glass-card rounded-2xl card-hover ${currentStep >= UPLOAD_STEPS.DEVICE_CONFIG ? 'border-cyan-500/30' : 'border-gray-200 dark:border-gray-800'}`}>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-lg">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/10 to-blue-600/10">
+                  <Server className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                </div>
+                2. Device Configuration
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4 pt-6">
+              <DeviceTargetSelector parameters={parameters} onParamChange={setParameters} />
+              <Separator className="bg-gray-200 dark:bg-gray-800" />
+              <DeviceAuthFields parameters={parameters} onParamChange={setParameters} />
+            </CardContent>
+          </Card>
+
+          {/* Step 3: Logs */}
+          <Card className="glass-card rounded-2xl border-gray-200 dark:border-gray-800">
+            <CardHeader className="pb-4">
+               <div className="flex items-center justify-between">
+                <CardTitle className="flex items-center gap-3 text-lg text-black dark:text-white">
+                  <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/10 to-blue-600/10">
+                    <Terminal className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                  </div>
+                  Live Execution Log
+                </CardTitle>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setShowTechnicalLogs(!showTechnicalLogs)}
+                  className="text-xs text-gray-600 dark:text-gray-400"
+                >
+                  {showTechnicalLogs ? 'Hide Debug' : 'Show Debug'}
+                </Button>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <LiveLogViewer
+                logs={terminalLogs}
+                isConnected={isConnected}
+                height="h-[350px]"
+                showTechnical={showTechnicalLogs}
+                isDarkTheme={true}
+              />
+            </CardContent>
+          </Card>
+
+          {/* Step 4: Validation & Upload */}
+          <Card className={`glass-card rounded-2xl card-hover ${currentStep >= UPLOAD_STEPS.STORAGE_VALIDATION ? 'border-cyan-500/30' : 'border-gray-200 dark:border-gray-800'}`}>
+            <CardHeader className="pb-4">
+              <CardTitle className="flex items-center gap-3 text-lg">
+                <div className="p-2 rounded-lg bg-gradient-to-br from-cyan-500/10 to-blue-600/10">
+                  <HardDrive className="w-5 h-5 text-cyan-600 dark:text-cyan-400" />
+                </div>
+                3. Validation & Upload
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-6 pt-6">
+              {/* Status Box - Modern OLED */}
+              <div className={`p-4 rounded-2xl border-2 backdrop-blur-sm ${getStorageStatusColor()} space-y-3`}>
+                <div className="flex items-center justify-between">
+                  <span className="font-bold flex items-center gap-2 text-black dark:text-white">
+                    {getStorageStatusIcon()} {getStorageStatusText()}
+                  </span>
+                  {isCheckingStorage && <Loader2 className="h-4 w-4 animate-spin text-cyan-600 dark:text-cyan-400" />}
+                </div>
+
+                {storageCheck && storageCheck.has_sufficient_space && (
+                   <div className="p-3 bg-green-100 dark:bg-green-950/30 rounded-xl text-sm text-green-800 dark:text-green-300 border border-green-300 dark:border-green-800/50">
+                      <div className="font-semibold mb-2 flex items-center gap-2">
+                        <CheckCircle2 className="w-4 h-4" />
+                        ✅ Sufficient Space Found
+                      </div>
+                      <div className="grid grid-cols-2 gap-2 text-xs">
+                        <span className="font-medium text-gray-700 dark:text-gray-300">Required:</span>
+                        <span className="font-mono text-right text-gray-900 dark:text-gray-100">
+                          {(storageCheck.required_mb || 0).toFixed(2)} MB
+                        </span>
+                        <span className="font-medium text-gray-700 dark:text-gray-300">Available:</span>
+                        <span className="font-mono text-right text-green-700 dark:text-green-400 font-bold">
+                          {(storageCheck.available_mb || 0).toFixed(2)} MB
+                        </span>
+                      </div>
+                   </div>
+                )}
+
+                {(storageCheckError || (storageCheck && !storageCheck.has_sufficient_space)) && (
+                   <Button onClick={startStorageCheck} disabled={isCheckingStorage} variant="outline" size="sm" className="w-full mt-3">
+                     Retry Validation
+                   </Button>
+                )}
               </div>
 
-              {storageCheck && storageCheck.has_sufficient_space && (
-                 <div className="p-3 bg-green-100 rounded text-sm text-green-800 border border-green-300">
-                    <div className="font-semibold mb-1">✅ Sufficient Space Found</div>
-                    <div className="grid grid-cols-2 gap-1 text-xs">
-                      <span className="font-medium">Required:</span>
-                      <span className="font-mono text-right">{(storageCheck.required_mb || 0).toFixed(2)} MB</span>
-                      <span className="font-medium">Available:</span>
-                      <span className="font-mono text-green-700 font-bold text-right">
-                        {(storageCheck.available_mb || 0).toFixed(2)} MB
-                      </span>
-                    </div>
-                </div>
-              )}
-
-              {(storageCheckError || (storageCheck && !storageCheck.has_sufficient_space)) && (
-                 <Button onClick={startStorageCheck} disabled={isCheckingStorage} variant="outline" size="sm" className="w-full mt-3">
-                   Retry Validation
-                 </Button>
-              )}
-            </div>
-
-            {/* Upload Action */}
-            <div className="space-y-4">
-              {!uploadComplete ? (
-                <>
-                  <Button
-                    onClick={handleUpload}
-                    disabled={!selectedFile || !parameters.hostname || !parameters.username || !parameters.password || !storageCheck?.has_sufficient_space || isUploadingResolved}
-                    className="w-full bg-gray-900 hover:bg-black"
-                    size="lg"
-                  >
-                    {isUploadingResolved ? `Uploading... ${uploadProgressResolved.toFixed(0)}%` : 'Start Upload'}
+              {/* Upload Action - Gradient Button */}
+              <div className="space-y-4">
+                {!uploadComplete ? (
+                  <>
+                    <Button
+                      onClick={handleUpload}
+                      disabled={!selectedFile || !parameters.hostname || !parameters.username || !parameters.password || !storageCheck?.has_sufficient_space || isUploadingResolved}
+                      className="w-full bg-gradient-to-r from-cyan-500 to-blue-600 hover:from-cyan-600 hover:to-blue-700 text-white shadow-lg shadow-cyan-500/25 transition-all duration-300"
+                      size="lg"
+                    >
+                      {isUploadingResolved ? (
+                        <>
+                          <Loader2 className="w-5 h-5 mr-2 animate-spin" />
+                          Uploading... {uploadProgressResolved.toFixed(0)}%
+                        </>
+                      ) : (
+                        <>
+                          <Upload className="w-5 h-5 mr-2" />
+                          Start Upload
+                        </>
+                      )}
+                    </Button>
+                    {isUploadingResolved && (
+                      <div className="space-y-2">
+                        <div className="flex justify-between text-sm">
+                          <span className="text-gray-700 dark:text-gray-300">Progress</span>
+                          <span className="text-cyan-600 dark:text-cyan-400 font-semibold">
+                            {uploadProgressResolved.toFixed(1)}%
+                          </span>
+                        </div>
+                        <div className="w-full bg-gray-200 dark:bg-gray-800 rounded-full h-2 overflow-hidden">
+                          <div
+                            className="bg-gradient-to-r from-cyan-500 to-blue-600 h-2 rounded-full transition-all duration-300 shimmer"
+                            style={{ width: `${uploadProgressResolved}%` }}
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <Button onClick={handleReset} className="w-full bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white shadow-lg shadow-green-500/25 transition-all duration-300">
+                    <Upload className="w-5 h-5 mr-2" />
+                    Upload Another File
                   </Button>
-                  {isUploadingResolved && <Progress value={uploadProgressResolved} className="h-3" />}
-                </>
-              ) : (
-                <Button onClick={handleReset} className="w-full bg-gray-900">Upload Another File</Button>
-              )}
+                )}
 
-              {uploadError && (
-                <Alert className="bg-red-50 border-red-200">
-                  <AlertCircle className="h-4 w-4 text-red-600" />
-                  <AlertDescription className="text-red-800">{uploadError}</AlertDescription>
-                </Alert>
-              )}
-            </div>
-          </CardContent>
-        </Card>
+                {uploadError && (
+                  <Alert className="bg-red-50 dark:bg-red-950/20 border-red-500/30">
+                    <AlertCircle className="h-4 w-4 text-red-600 dark:text-red-400" />
+                    <AlertDescription className="text-red-800 dark:text-red-300">{uploadError}</AlertDescription>
+                  </Alert>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        </div>
       </div>
     </div>
   );
