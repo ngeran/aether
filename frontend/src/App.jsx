@@ -13,6 +13,10 @@ import Backup from './pages/Operations/Backup.jsx';
 import RestorePage from './pages/Operations/RestorePage.jsx';
 import BackupSettings from './pages/Operations/BackupSettings.jsx';
 
+// Import Landing Page and Dashboard
+import Landing from './pages/Landing.jsx';
+import Dashboard from './pages/Dashboard.jsx';
+
 
 // =================================================================
 // ROUTE STRUCTURE GENERATOR
@@ -25,14 +29,21 @@ import BackupSettings from './pages/Operations/BackupSettings.jsx';
  */
 const createRouteStructure = (dynamicRoutes) => {
   return [
+    // 1. LANDING PAGE (Root path - no layout)
+    {
+      index: true,
+      element: <Landing />,
+    },
+
+    // 2. MAIN APP LAYOUT (All other pages)
     {
       path: '/',
       element: <AppLayout />,
       children: [
-        // 1. Root Redirect
-        { index: true, element: <Navigate to="/dashboard" replace /> },
+        // 2.1. Dashboard
+        { path: 'dashboard', element: <Dashboard /> },
 
-        // 2. STATIC OPERATIONS LAYOUT
+        // 2.2. STATIC OPERATIONS LAYOUT
         {
           path: 'operations',
           element: <OperationsLayout />,
@@ -50,10 +61,10 @@ const createRouteStructure = (dynamicRoutes) => {
           ],
         },
 
-        // 3. Dynamic Routes (All other top-level pages)
+        // 2.3. Dynamic Routes (All other top-level pages)
         ...dynamicRoutes,
 
-        // 4. Fallback Route
+        // 2.4. Fallback Route
         { path: '*', element: <div className="p-4 text-center">404: Page Not Found</div> }
       ]
     }
